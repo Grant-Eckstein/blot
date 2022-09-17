@@ -38,6 +38,16 @@ func Compress() Method {
 	return NewMethod(compressMethodFunc, parameters)
 }
 
+func Decompress() Method {
+	parameters := NewMethodParameters(false, Parameters{})
+	return NewMethod(decompressMethodFunc, parameters)
+}
+
+func Uncompress() Method {
+	parameters := NewMethodParameters(false, Parameters{})
+	return NewMethod(decompressMethodFunc, parameters)
+}
+
 func Encrypt() Method {
 	eg := everglade.New()
 
@@ -55,8 +65,13 @@ var compressMethodFunc MethodFunc = func(in []byte, parameters MethodParameters)
 	return in
 }
 
+var decompressMethodFunc MethodFunc = func(in []byte, parameters MethodParameters) []byte {
+	return in
+}
+
 var encryptMethodFunc MethodFunc = func(in []byte, parameters MethodParameters) []byte {
 	eg := everglade.Import(parameters.Data["egJSON"])
-	eg.EncryptCBC(in)
-	return in
+	iv, ct := eg.EncryptCBC(in)
+	parameters.Data["iv"] = iv
+	return ct
 }
