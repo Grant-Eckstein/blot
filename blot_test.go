@@ -9,6 +9,7 @@ func TestBlot_Obfuscate(t *testing.T) {
 	var methods []Method
 
 	methods = append(methods, Compress())
+	methods = append(methods, Decompress())
 	methods = append(methods, Encrypt())
 
 	blot := NewBlot(methods)
