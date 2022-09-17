@@ -24,9 +24,9 @@ func Encrypt() Method {
 
 /* Actual methods go here */
 var compressMethodFunc MethodFunc = func(in []byte) []byte {
-	return nil
+	return in
 }
 
 var encryptMethodFunc MethodFunc = func(in []byte) []byte {
-	return nil
+	return in
 }
