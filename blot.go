@@ -8,13 +8,16 @@ import (
 // Blot represents a new Blot instance
 type Blot struct {
 	Methods []Method
+	Data    Parameters
 }
 
 // NewBlot creates a new blot instance
-func NewBlot(methods []Method) Blot {
-	return Blot{
-		Methods: methods,
-	}
+func NewBlot() Blot {
+	return Blot{}
+}
+
+func (b *Blot) addMethod(method Method) {
+	b.Methods = append(b.Methods, method)
 }
 
 // Run processes data through each method in order
@@ -28,7 +31,7 @@ func (b *Blot) Run(data []byte) []byte {
 
 // Export Blot configuration to JSON
 func (b *Blot) Export() []byte {
-	o, err := json.Marshal(b)
+	o, err := json.Marshal(b.Data)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -38,12 +41,16 @@ func (b *Blot) Export() []byte {
 
 // Import Blot configuration from JSON
 func Import(j []byte) Blot {
-	var o Blot
-	err := json.Unmarshal(j, &o)
+	var p Parameters
+	err := json.Unmarshal(j, &p)
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	o := Blot{
+		Methods: nil,
+		Data:    p,
+	}
 	return o
 }

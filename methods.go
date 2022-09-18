@@ -1,30 +1,21 @@
 package blot
 
-import "github.com/Grant-Eckstein/everglade"
+import (
+	"github.com/Grant-Eckstein/everglade"
+	"log"
+)
 
 // MethodFunc represents a function to run against the data
-type MethodFunc func(in []byte, parameters MethodParameters) []byte
+type MethodFunc func(in []byte, parameters Parameters) []byte
 
 type Parameters map[string][]byte
 
 type Method struct {
 	Method     MethodFunc
-	Parameters MethodParameters
+	Parameters Parameters
 }
 
-type MethodParameters struct {
-	Needed bool
-	Data   Parameters
-}
-
-func NewMethodParameters(needed bool, data map[string][]byte) MethodParameters {
-	return MethodParameters{
-		Needed: needed,
-		Data:   data,
-	}
-}
-
-func NewMethod(method MethodFunc, parameters MethodParameters) Method {
+func NewMethod(method MethodFunc, parameters Parameters) Method {
 	return Method{
 		Method:     method,
 		Parameters: parameters,
@@ -33,45 +24,58 @@ func NewMethod(method MethodFunc, parameters MethodParameters) Method {
 
 /* Method exports go here */
 
-func Compress() Method {
-	parameters := NewMethodParameters(false, Parameters{})
-	return NewMethod(compressMethodFunc, parameters)
+func (b *Blot) Compress() Method {
+	return NewMethod(compressMethodFunc, b.Data)
 }
 
-func Decompress() Method {
-	parameters := NewMethodParameters(false, Parameters{})
-	return NewMethod(decompressMethodFunc, parameters)
+func (b *Blot) Decompress() Method {
+	return NewMethod(decompressMethodFunc, b.Data)
 }
 
-func Uncompress() Method {
-	parameters := NewMethodParameters(false, Parameters{})
-	return NewMethod(decompressMethodFunc, parameters)
-}
-
-func Encrypt() Method {
+func (b *Blot) Encrypt() Method {
 	eg := everglade.New()
 
 	// Create method parameters
-	parameters := map[string][]byte{
-		"egJSON": eg.Export(),
+	if b.Data == nil {
+		b.Data = make(Parameters)
 	}
-	//parameters["egJSON"] = eg.Export()
+	b.Data["egJSON"] = eg.Export()
 
-	return NewMethod(encryptMethodFunc, NewMethodParameters(true, parameters))
+	return NewMethod(encryptMethodFunc, b.Data)
+}
+
+func (b *Blot) Decrypt() Method {
+	// Assert that config exists
+	if b.Data == nil {
+		log.Fatalln("Data not set for decryption")
+	}
+
+	return NewMethod(decryptMethodFunc, b.Data)
 }
 
 /* Actual methods go here */
-var compressMethodFunc MethodFunc = func(in []byte, parameters MethodParameters) []byte {
+var compressMethodFunc MethodFunc = func(in []byte, parameters Parameters) []byte {
 	return in
 }
 
-var decompressMethodFunc MethodFunc = func(in []byte, parameters MethodParameters) []byte {
+var decompressMethodFunc MethodFunc = func(in []byte, parameters Parameters) []byte {
 	return in
 }
 
-var encryptMethodFunc MethodFunc = func(in []byte, parameters MethodParameters) []byte {
-	eg := everglade.Import(parameters.Data["egJSON"])
+var encryptMethodFunc MethodFunc = func(in []byte, parameters Parameters) []byte {
+
+	if parameters == nil {
+		parameters = make(Parameters)
+	}
+
+	eg := everglade.Import(parameters["egJSON"])
 	iv, ct := eg.EncryptCBC(in)
-	parameters.Data["iv"] = iv
+	parameters["iv"] = iv
 	return ct
+}
+
+var decryptMethodFunc MethodFunc = func(in []byte, parameters Parameters) []byte {
+	eg := everglade.Import(parameters["egJSON"])
+	pt := eg.DecryptCBC(parameters["iv"], in)
+	return pt
 }
