@@ -1,8 +1,11 @@
 package blot
 
 import (
+	"bytes"
+	"compress/flate"
 	"encoding/base64"
 	"github.com/Grant-Eckstein/everglade"
+	"io"
 	"log"
 )
 
@@ -35,7 +38,7 @@ func (b *Blot) Decompress() Method {
 
 func (b *Blot) Encrypt() Method {
 
-	// Keyset does not exist
+	// Key set does not exist
 	if _, ok := b.Data["egJSON"]; !ok {
 		eg := everglade.New()
 		// Create method parameters
@@ -67,15 +70,41 @@ func (b *Blot) Decode() Method {
 
 /* Actual methods go here */
 var compressMethodFunc MethodFunc = func(in []byte, parameters Parameters) []byte {
-	return in
+	var b bytes.Buffer
+	w, err := flate.NewWriter(&b, 9)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	_, err = w.Write(in)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	err = w.Close()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	return b.Bytes()
 }
 
 var decompressMethodFunc MethodFunc = func(in []byte, parameters Parameters) []byte {
-	return in
+	dc := flate.NewReader(bytes.NewReader(in))
+
+	rb, err := io.ReadAll(dc)
+	if err != nil {
+		if err != io.EOF {
+			log.Fatalln(err)
+		}
+	}
+
+	err = dc.Close()
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	return rb
 }
 
 var encryptMethodFunc MethodFunc = func(in []byte, parameters Parameters) []byte {
-
 	if parameters == nil {
 		parameters = make(Parameters)
 	}
@@ -92,7 +121,6 @@ var decryptMethodFunc MethodFunc = func(in []byte, parameters Parameters) []byte
 	return pt
 }
 
-// TODO b64 encode/decode
 var encodeBase64 MethodFunc = func(in []byte, parameters Parameters) []byte {
 	dst := make([]byte, base64.StdEncoding.EncodedLen(len(in)))
 	base64.StdEncoding.Encode(dst, in)
