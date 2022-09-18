@@ -56,3 +56,36 @@ func TestBlot_Export(t *testing.T) {
 		t.Errorf("Input %v does not match input2 %v", input, input2)
 	}
 }
+
+func TestBlot_Encode(t *testing.T) {
+	blot := NewBlot()
+
+	blot.addMethod(blot.Encode())
+	blot.addMethod(blot.Decode())
+
+	input := []byte("Hello, world")
+	output := blot.Run(input)
+
+	if bytes.Compare(input, output) != 0 {
+		t.Errorf("Input %v does not match output %v", input, output)
+	}
+}
+
+func TestBlot_Layering(t *testing.T) {
+	blot := NewBlot()
+
+	blot.addMethod(blot.Encode())
+	blot.addMethod(blot.Compress())
+	blot.addMethod(blot.Encrypt())
+
+	blot.addMethod(blot.Decrypt())
+	blot.addMethod(blot.Decompress())
+	blot.addMethod(blot.Decode())
+
+	input := []byte("Hello, world")
+	output := blot.Run(input)
+
+	if bytes.Compare(input, output) != 0 {
+		t.Errorf("Input %v does not match output %v", input, output)
+	}
+}
