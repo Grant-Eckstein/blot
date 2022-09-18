@@ -10,8 +10,8 @@ func TestBlot_Compression(t *testing.T) {
 
 	blot := NewBlot()
 
-	blot.addMethod(blot.Compress())
-	blot.addMethod(blot.Decompress())
+	blot.Add(blot.Compress())
+	blot.Add(blot.Decompress())
 
 	input := []byte("Hello,world")
 	output := blot.Run(input)
@@ -24,8 +24,8 @@ func TestBlot_Compression(t *testing.T) {
 func TestBlot_Encrypt(t *testing.T) {
 	blot := NewBlot()
 
-	blot.addMethod(blot.Encrypt())
-	blot.addMethod(blot.Decrypt())
+	blot.Add(blot.Encrypt())
+	blot.Add(blot.Decrypt())
 
 	input := []byte("Hello, world")
 	output := blot.Run(input)
@@ -39,7 +39,7 @@ func TestBlot_Export(t *testing.T) {
 	// Create test blot
 	blot := NewBlot()
 
-	blot.addMethod(blot.Encrypt())
+	blot.Add(blot.Encrypt())
 
 	input := []byte("Hello, world")
 	output := blot.Run(input)
@@ -49,7 +49,7 @@ func TestBlot_Export(t *testing.T) {
 
 	// Create new blot from export
 	blot2 := Import(j)
-	blot2.addMethod(blot2.Decrypt())
+	blot2.Add(blot2.Decrypt())
 	input2 := blot2.Run(output)
 
 	if bytes.Compare(input, input2) != 0 {
@@ -60,8 +60,8 @@ func TestBlot_Export(t *testing.T) {
 func TestBlot_Encode(t *testing.T) {
 	blot := NewBlot()
 
-	blot.addMethod(blot.Encode())
-	blot.addMethod(blot.Decode())
+	blot.Add(blot.Encode())
+	blot.Add(blot.Decode())
 
 	input := []byte("Hello, world")
 	output := blot.Run(input)
@@ -74,13 +74,13 @@ func TestBlot_Encode(t *testing.T) {
 func TestBlot_Layering(t *testing.T) {
 	blot := NewBlot()
 
-	blot.addMethod(blot.Encode())
-	blot.addMethod(blot.Compress())
-	blot.addMethod(blot.Encrypt())
+	blot.Add(blot.Encode())
+	blot.Add(blot.Compress())
+	blot.Add(blot.Encrypt())
 
-	blot.addMethod(blot.Decrypt())
-	blot.addMethod(blot.Decompress())
-	blot.addMethod(blot.Decode())
+	blot.Add(blot.Decrypt())
+	blot.Add(blot.Decompress())
+	blot.Add(blot.Decode())
 
 	input := []byte("Hello, world")
 	output := blot.Run(input)

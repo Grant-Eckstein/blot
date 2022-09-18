@@ -16,7 +16,7 @@ func NewBlot() Blot {
 	return Blot{}
 }
 
-func (b *Blot) addMethod(method Method) {
+func (b *Blot) Add(method Method) {
 	b.Methods = append(b.Methods, method)
 }
 
