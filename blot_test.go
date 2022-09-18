@@ -2,7 +2,6 @@ package blot
 
 import (
 	"bytes"
-	"fmt"
 	"testing"
 )
 
@@ -54,9 +53,6 @@ func TestBlot_Export(t *testing.T) {
 	input2 := blot2.Run(output)
 
 	if bytes.Compare(input, input2) != 0 {
-		t.Errorf("Input %v does not match output %v", input, output)
+		t.Errorf("Input %v does not match input2 %v", input, input2)
 	}
-
-	fmt.Printf("Input: %v\n", string(input))
-	fmt.Printf("Input2: %v\n", string(input2))
 }
