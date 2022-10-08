@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"compress/flate"
 	"encoding/base64"
-	"github.com/Grant-Eckstein/everglade"
+	"github.com/Grant-Eckstein/blind"
 	"io"
 	"log"
 )
@@ -39,13 +39,14 @@ func (b *Blot) Decompress() Method {
 func (b *Blot) Encrypt() Method {
 
 	// Key set does not exist
-	if _, ok := b.Data["egJSON"]; !ok {
-		eg := everglade.New()
+	if _, ok := b.Data["bJSON"]; !ok {
+		bo, _ := blind.New()
+
 		// Create method parameters
 		if b.Data == nil {
 			b.Data = make(Parameters)
 		}
-		b.Data["egJSON"] = eg.Export()
+		b.Data["bJSON"] = bo.Export()
 	}
 
 	return NewMethod(encryptMethodFunc, b.Data)
@@ -53,7 +54,7 @@ func (b *Blot) Encrypt() Method {
 
 func (b *Blot) Decrypt() Method {
 	// Assert that config exists
-	if _, ok := b.Data["egJSON"]; !ok {
+	if _, ok := b.Data["bJSON"]; !ok {
 		log.Fatalln("Data not set for decryption")
 	}
 
@@ -109,15 +110,15 @@ var encryptMethodFunc MethodFunc = func(in []byte, parameters Parameters) []byte
 		parameters = make(Parameters)
 	}
 
-	eg := everglade.Import(parameters["egJSON"])
-	iv, ct := eg.EncryptCBC(in)
-	parameters["iv"] = iv
+	bo := blind.Import(parameters["bJSON"])
+
+	ct, _ := bo.AES.Encrypt(in)
 	return ct
 }
 
 var decryptMethodFunc MethodFunc = func(in []byte, parameters Parameters) []byte {
-	eg := everglade.Import(parameters["egJSON"])
-	pt := eg.DecryptCBC(parameters["iv"], in)
+	bo := blind.Import(parameters["bJSON"])
+	pt, _ := bo.AES.Decrypt(in)
 	return pt
 }
 
