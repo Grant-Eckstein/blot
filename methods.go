@@ -112,13 +112,13 @@ var encryptMethodFunc MethodFunc = func(in []byte, parameters Parameters) []byte
 
 	bo := blind.Import(parameters["bJSON"])
 
-	ct, _ := bo.AES.Encrypt(in)
+	ct, _ := bo.AES.CBC.Encrypt(in)
 	return ct
 }
 
 var decryptMethodFunc MethodFunc = func(in []byte, parameters Parameters) []byte {
 	bo := blind.Import(parameters["bJSON"])
-	pt, _ := bo.AES.Decrypt(in)
+	pt, _ := bo.AES.CBC.Decrypt(in)
 	return pt
 }
 
